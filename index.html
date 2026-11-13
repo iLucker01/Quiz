@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Quiz Arena by iLucker01</title>
+    <style>
+        :root {
+            --bg-main: #090b10;
+            --bg-card: #121622;
+            --bg-card-hover: #191f30;
+            --primary: #00f0ff;
+            --secondary: #9d00ff;
+            --accent: #ff0055;
+            --success: #00e676;
+            --gold: #ffbe0b;
+            --text-main: #f0f4f8;
+            --text-muted: #8b9bb4;
+            --border: #232b3e;
+            --radius: 16px;
+            --shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.08), transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(157, 0, 255, 0.08), transparent 40%);
+        }
+
+        header {
+            background: rgba(18, 22, 34, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .author-tag {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            -webkit-text-fill-color: var(--text-muted);
+        }
+
+        .highscore-pill {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .highscore-val {
+            color: var(--gold);
+            font-size: 1.05rem;
+        }
+
+        main {
+            max-width: 850px;
+            width: 100%;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2.2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* MENU SCREEN */
+        .menu-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .menu-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .cat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+        }
+
+        .cat-card {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .cat-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            background: var(--bg-card-hover);
+        }
+
+        .cat-icon {
+            font-size: 2.2rem;
+        }
+
+        .cat-card h3 {
+            font-size: 1.15rem;
+            color: var(--text-main);
+        }
+
+        .cat-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* QUIZ SCREEN */
+        .quiz-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.9rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .timer-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-main);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 1.8rem;
+            border: 1px solid var(--border);
+        }
+
+        .timer-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.1s linear;
+        }
+
+        .question-text {
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1.45;
+            margin-bottom: 1.8rem;
+            min-height: 65px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .option-btn {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 1.1rem 1.4rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: var(--bg-card-hover);
+            transform: translateX(5px);
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        .option-btn.correct {
+            background: rgba(0, 230, 118, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .option-btn.wrong {
+            background: rgba(255, 0, 85, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .option-letter {
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border);
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .quiz-footer {
+            margin-top: 1.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        .feedback-msg {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            background: linear-gradient(90deg, var(--primary), #00b8d4);
+            color: #05080f;
+            border: none;
+            padding: 0.85rem 1.6rem;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+        .btn:active { transform: scale(0.97); }
+
+        .btn-secondary {
+            background: var(--bg-card-hover);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        /* RESULT SCREEN */
+        .result-box {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .result-rank {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--gold), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        .stat-box {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            padding: 1.2rem;
+            border-radius: 12px;
+        }
+
+        .stat-box span {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .stat-box strong {
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 650px) {
+            .cat-grid { grid-template-columns: 1fr; }
+            .result-stats { grid-template-columns: 1fr; }
+            .card { padding: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        🧠 Cyber Quiz Arena
+        <span class="author-tag">Vytvoril: iLucker01 • Vedomostná výzva na čas</span>
+    </div>
+
+    <div class="highscore-pill">
+        🏆 Rekord: <span class="highscore-val" id="highscore-display">0</span> bodov
+    </div>
+</header>
+
+<main>
+    <div class="card">
+        <!-- 1. VÝBER KATEGÓRIE -->
+        <div class="screen active" id="screen-menu">
+            <div class="menu-header">
+                <h1>Vyber si arénu</h1>
+                <p>Odpovedaj rýchlo! Za každú správnu odpoveď získaš 100 bodov + časový bonus.</p>
+            </div>
+
+            <div class="cat-grid">
+                <div class="cat-card" onclick="startQuiz('space')">
+                    <span class="cat-icon">🪐</span>
+                    <h3>Vesmír & Kozmos</h3>
+                    <p>Planéty, hviezdy, čierne diery a tajomstvá galaxií (5 otázok).</p>
+                </div>
+
+                <div class="cat-card" onclick="startQuiz('code')">
+                    <span class="cat-icon">💻</span>
+                    <h3>Programovanie & IT</h3>
+                    <p>Kódovanie, internet, hardvér a história počítačov (5 otázok).</p>
+                </div>
+
+                <div class="cat-card" onclick="startQuiz('gaming')">
+                    <span class="cat-icon">🎮</span>
+                    <h3>Svet Videohier</h3>
+                    <p>Legendárne hry, konzoly a zaujímavosti z herného sveta (5 otázok).</p>
+                </div>
+
+                <div class="cat-card" onclick="startQuiz('science')">
+                    <span class="cat-icon">⚡</span>
+                    <h3>Veda & História</h3>
+                    <p>Objavy, príroda, ľudské telo a veľké momenty minulosti (5 otázok).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. PRIEBEH KVÍZU -->
+        <div class="screen" id="screen-quiz">
+            <div class="quiz-top">
+                <span class="badge" id="q-progress">Otázka 1 / 5</span>
+                <span class="badge" style="color: var(--gold);">⚡ Skóre: <span id="current-score">0</span></span>
+                <span class="badge" style="color: var(--primary);">⏱️ <span id="time-left">15.0</span>s</span>
+            </div>
+
+            <div class="timer-bar-bg">
+                <div class="timer-bar-fill" id="timer-bar"></div>
+            </div>
+
+            <div class="question-text" id="question-text">Načítavam otázku...</div>
+
+            <div class="options-list" id="options-container"></div>
+
+            <div class="quiz-footer">
+                <span class="feedback-msg" id="feedback-msg"></span>
+                <button class="btn" id="next-btn" onclick="nextQuestion()" style="display: none;">Ďalšia otázka →</button>
+            </div>
+        </div>
+
+        <!-- 3. VÝSLEDKY -->
+        <div class="screen" id="screen-result">
+            <div class="result-box">
+                <span style="font-size: 3.5rem;" id="result-emoji">🏆</span>
+                <h2>Kvíz dokončený!</h2>
+                <div class="result-rank" id="result-rank">Majster Vedomostí</div>
+                <p style="color: var(--text-muted);" id="new-record-msg"></p>
+
+                <div class="result-stats">
+                    <div class="stat-box">
+                        <span>Celkové skóre</span>
+                        <strong id="final-score" style="color: var(--gold);">0</strong>
+                    </div>
+                    <div class="stat-box">
+                        <span>Správne odpovede</span>
+                        <strong id="final-correct" style="color: var(--success);">0 / 5</strong>
+                    </div>
+                    <div class="stat-box">
+                        <span>Najdlhšia séria</span>
+                        <strong id="final-streak">0x</strong>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; width: 100%;">
+                    <button class="btn" onclick="restartSameCategory()">🔄 Hrať znova túto tému</button>
+                    <button class="btn btn-secondary" onclick="showMenu()">🏠 Vybrať inú tému</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    Cyber Quiz Arena • Vytvoril iLucker01 • Otestuj svoje znalosti a prekonaj rekord
+</footer>
+
+<script>
+    const quizDB = {
+        space: [
+            {
+                q: "Ktorá planéta slnečnej sústavy sa otočí okolo vlastnej osi pomalšie, než obehne okolo Slnka?",
+                options: ["Mars", "Venuša", "Merkúr", "Neptún"],
+                answer: 1
+            },
+            {
+                q: "Ako sa volá galaxia, v ktorej sa nachádza naša slnečná sústava?",
+                options: ["Andromeda", "Mliečna cesta", "Sombrero", "Veľký Magellanov mrak"],
+                answer: 1
+            },
+            {
+                q: "Čo je to 'horizont udalostí' pri čiernej diere?",
+                options: ["Miesto, kde vznikajú nové hviezdy", "Hranica, spoza ktorej už nemôže uniknúť ani svetlo", "Stred Slnka", "Okraj našej galaxie"],
+                answer: 1
+            },
+            {
+                q: "Ktorá planéta má najväčší počet známych mesiacov a výrazné prstence?",
+                options: ["Urán", "Jupiter", "Saturn", "Zem"],
+                answer: 2
+            },
+            {
+                q: "Približne ako dlho trvá svetlu cesta zo Slnka na Zem?",
+                options: ["8 sekúnd", "8 minút", "8 hodín", "8 dní"],
+                answer: 1
+            }
+        ],
+        code: [
+            {
+                q: "Ktorý jazyk sa používa na štruktúru a obsah webových stránok?",
+                options: ["Python", "HTML", "C++", "SQL"],
+                answer: 1
+            },
+            {
+                q: "Čo znamená skratka CSS pri tvorbe webu?",
+                options: ["Computer System Security", "Cascading Style Sheets", "Creative Software Studio", "Central Server Storage"],
+                answer: 1
+            },
+            {
+                q: "Ako sa nazýva pamäť v prehliadači, kam si tvoje stránky ukladajú skóre alebo nastavenia?",
+                options: ["CloudDrive", "localStorage", "HardDisk", "RAM_Cache"],
+                answer: 1
+            },
+            {
+                q: "Z akých dvoch číslic sa skladá binárna sústava, ktorej rozumejú procesory?",
+                options: ["1 a 2", "0 a 1", "0 a 9", "1 a 10"],
+                answer: 1
+            },
+            {
+                q: "Kto je považovaný za prvého programátora v histórii (19. storočie)?",
+                options: ["Bill Gates", "Ada Lovelace", "Alan Turing", "Steve Jobs"],
+                answer: 1
+            }
+        ],
+        gaming: [
+            {
+                q: "Ktorá videohra drží rekord ako najpredávanejšia hra všetkých čias?",
+                options: ["Grand Theft Auto V", "Minecraft", "Tetris", "Fortnite"],
+                answer: 1
+            },
+            {
+                q: "Aká bola prvá komerčne úspešná arkádová videohra z roku 1972?",
+                options: ["Pac-Man", "Pong", "Space Invaders", "Super Mario"],
+                answer: 1
+            },
+            {
+                q: "Čo znamená herná skratka 'NPC'?",
+                options: ["New Player Character", "Non-Player Character (postava riadená hrou)", "Next Power Control", "Night Pro Mode"],
+                answer: 1
+            },
+            {
+                q: "Ako sa volá hlavný hrdina hernej série The Legend of Zelda?",
+                options: ["Zelda", "Link", "Ganon", "Mario"],
+                answer: 1
+            },
+            {
+                q: "Čo meria údaj 'FPS' v počítačových hrách?",
+                options: ["Počet snímok za sekundu", "Rýchlosť internetu", "Veľkosť mapy", "Počet hráčov na serveri"],
+                answer: 0
+            }
+        ],
+        science: [
+            {
+                q: "Koľko sŕdc má chobotnica?",
+                options: ["Jedno", "Dve", "Tri", "Štyri"],
+                answer: 2
+            },
+            {
+                q: "Kde sa zvuk šíri rýchlejšie?",
+                options: ["Vo vzduchu", "Vo vode", "Vo vákuu (vesmíre)", "Všade rovnako"],
+                answer: 1
+            },
+            {
+                q: "Ktorý vedec náhodne objavil prvé antibiotikum – penicilín?",
+                options: ["Albert Einstein", "Alexander Fleming", "Nikola Tesla", "Isaac Newton"],
+                answer: 1
+            },
+            {
+                q: "Koľko percent energie celého tela spotrebuje ľudský mozog?",
+                options: ["Asi 2 %", "Asi 20 %", "Asi 50 %", "Asi 75 %"],
+                answer: 1
+            },
+            {
+                q: "Ktorý vynález Johanna Gutenberga v 15. storočí spôsobil revolúciu v šírení kníh?",
+                options: ["Parný stroj", "Kníhtlač", "Kompas", "Ďalekohľad"],
+                answer: 1
+            }
+        ]
+    };
+
+    let currentCategory = "";
+    let questions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let correctCount = 0;
+    let streak = 0;
+    let maxStreak = 0;
+    let timerInterval = null;
+    let timeLeft = 15.0;
+    let answered = false;
+
+    let highScore = parseInt(localStorage.getItem("cyberQuizHighscore_iLucker01") || "0", 10);
+    document.getElementById("highscore-display").textContent = highScore;
+
+    function switchScreen(screenId) {
+        document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+        document.getElementById(screenId).classList.add("active");
+    }
+
+    function showMenu() {
+        clearInterval(timerInterval);
+        switchScreen("screen-menu");
+    }
+
+    function startQuiz(category) {
+        currentCategory = category;
+        // Zamiešanie otázok
+        questions = [...quizDB[category]].sort(() => Math.random() - 0.5);
+        currentIndex = 0;
+        score = 0;
+        correctCount = 0;
+        streak = 0;
+        maxStreak = 0;
+
+        document.getElementById("current-score").textContent = "0";
+        switchScreen("screen-quiz");
+        loadQuestion();
+    }
+
+    function restartSameCategory() {
+        startQuiz(currentCategory);
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const qObj = questions[currentIndex];
+
+        document.getElementById("q-progress").textContent = `Otázka ${currentIndex + 1} / ${questions.length}`;
+        document.getElementById("question-text").textContent = qObj.q;
+        document.getElementById("feedback-msg").textContent = "";
+        document.getElementById("next-btn").style.display = "none";
+
+        const letters = ["A", "B", "C", "D"];
+        const container = document.getElementById("options-container");
+        container.innerHTML = qObj.options.map((opt, idx) => `
+            <button class="option-btn" onclick="selectAnswer(${idx})">
+                <span class="option-letter">${letters[idx]}</span>
+                <span>${opt}</span>
+            </button>
+        `).join("");
+
+        startTimer();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 15.0;
+        const bar = document.getElementById("timer-bar");
+        const timeText = document.getElementById("time-left");
+        bar.style.width = "100%";
+
+        timerInterval = setInterval(() => {
+            timeLeft -= 0.1;
+            if (timeLeft <= 0) {
+                timeLeft = 0;
+                clearInterval(timerInterval);
+                handleTimeOut();
+            }
+            timeText.textContent = timeLeft.toFixed(1);
+            bar.style.width = `${(timeLeft / 15.0) * 100}%`;
+        }, 100);
+    }
+
+    function handleTimeOut() {
+        if (answered) return;
+        answered = true;
+        streak = 0;
+
+        const qObj = questions[currentIndex];
+        const buttons = document.querySelectorAll(".option-btn");
+        buttons.forEach((btn, idx) => {
+            btn.disabled = true;
+            if (idx === qObj.answer) btn.classList.add("correct");
+        });
+
+        const fb = document.getElementById("feedback-msg");
+        fb.textContent = "⏰ Čas vypršal!";
+        fb.style.color = "var(--accent)";
+        document.getElementById("next-btn").style.display = "inline-block";
+    }
+
+    function selectAnswer(selectedIndex) {
+        if (answered) return;
+        answered = true;
+        clearInterval(timerInterval);
+
+        const qObj = questions[currentIndex];
+        const buttons = document.querySelectorAll(".option-btn");
+        const fb = document.getElementById("feedback-msg");
+
+        buttons.forEach((btn, idx) => {
+            btn.disabled = true;
+            if (idx === qObj.answer) {
+                btn.classList.add("correct");
+            } else if (idx === selectedIndex) {
+                btn.classList.add("wrong");
+            }
+        });
+
+        if (selectedIndex === qObj.answer) {
+            correctCount++;
+            streak++;
+            if (streak > maxStreak) maxStreak = streak;
+
+            const timeBonus = Math.round(timeLeft * 5);
+            const streakBonus = streak > 1 ? (streak - 1) * 20 : 0;
+            const gained = 100 + timeBonus + streakBonus;
+            score += gained;
+
+            document.getElementById("current-score").textContent = score;
+            fb.textContent = `✅ Správne! +${gained} bodov ${streak > 1 ? `(🔥 Séria ${streak}x!)` : ""}`;
+            fb.style.color = "var(--success)";
+        } else {
+            streak = 0;
+            fb.textContent = "❌ Nesprávna odpoveď!";
+            fb.style.color = "var(--accent)";
+        }
+
+        const nextBtn = document.getElementById("next-btn");
+        nextBtn.textContent = currentIndex === questions.length - 1 ? "Zobraziť výsledky 🏆" : "Ďalšia otázka →";
+        nextBtn.style.display = "inline-block";
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        switchScreen("screen-result");
+
+        document.getElementById("final-score").textContent = score;
+        document.getElementById("final-correct").textContent = `${correctCount} / ${questions.length}`;
+        document.getElementById("final-streak").textContent = `${maxStreak}x`;
+
+        let rank = "Nováčik Arény 🌱";
+        let emoji = "🎯";
+        if (correctCount === 5) {
+            rank = "Cyber Génius 👑";
+            emoji = "🏆";
+        } else if (correctCount >= 3) {
+            rank = "Skúsený Prieskumník 🚀";
+            emoji = "⭐";
+        }
+
+        document.getElementById("result-rank").textContent = rank;
+        document.getElementById("result-emoji").textContent = emoji;
+
+        const recordMsg = document.getElementById("new-record-msg");
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem("cyberQuizHighscore_iLucker01", highScore.toString());
+            document.getElementById("highscore-display").textContent = highScore;
+            recordMsg.textContent = "🎉 NOVÝ OSOBNÝ REKORD!";
+            recordMsg.style.color = "var(--gold)";
+        } else {
+            recordMsg.textContent = `Tvoj doterajší rekord je ${highScore} bodov.`;
+            recordMsg.style.color = "var(--text-muted)";
+        }
+    }
+</script>
+</body>
+</html>
